@@ -1,33 +1,18 @@
+// The right-click menu: Save to Memopad (selected text) or Save page to
+// Memopad (the page itself).
+
+import { addNote, noteFromPage } from "./lib/store.js";
+
 chrome.runtime.onInstalled.addListener(() => {
-    console.log("Sticky Notes Extension Installed");
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({ id: "save", title: "Save to Memopad", contexts: ["selection"] });
+    chrome.contextMenus.create({ id: "save-page", title: "Save page to Memopad", contexts: ["page"] });
+  });
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "saveNote") {
-        chrome.storage.local.set({ [request.noteId]: request.noteContent }, () => {
-            sendResponse({ status: "success" });
-        });
-        return true;
-    }
-
-    if (request.action === "getNote") {
-        chrome.storage.local.get([request.noteId], (result) => {
-            sendResponse({ status: "success", noteContent: result[request.noteId] });
-        });
-        return true;
-    }
-
-    if (request.action === "deleteNote") {
-        chrome.storage.local.remove([request.noteId], () => {
-            sendResponse({ status: "success" });
-        });
-        return true;
-    }
-
-    if (request.action === "getAllNotes") {
-        chrome.storage.local.get(null, (items) => {
-            sendResponse({ status: "success", notes: items });
-        });
-        return true;
-    }
+// The click grants activeTab, which is what exposes the tab's URL and title.
+// info.pageUrl is the fallback when the tab's details aren't available.
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  const note = noteFromPage(info.menuItemId, info, tab);
+  if (note) await addNote(note);
 });
