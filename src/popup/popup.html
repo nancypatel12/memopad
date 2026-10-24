@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sticky Notes</title>
+    <title>Memopad</title>
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <div id="sticky-notes-container">
+    <div id="app">
         <div class="header">
-            <h4>[Memopad]</h4>
+            <h4><a id="review" href="https://chromewebstore.google.com/detail/memopad/omcpfoipabmmcjpooadjcioiejenaopa/reviews" target="_blank" rel="noopener" title="Review Memopad">[Memopad]</a></h4>
+            <button id="new-section">+ Section</button>
         </div>
+        <input id="search" type="text" placeholder="Search" autocomplete="off" hidden>
         <div id="notes"></div>
         <div id="new-note-container">
             <textarea id="new-note" placeholder="Type your note here..."></textarea>
-            <button id="add-note">Add Note</button>
+            <div class="composer-actions">
+                <select id="note-section" aria-label="Add to section" hidden></select>
+                <button id="add-note">Add Note</button>
+            </div>
         </div>
     </div>
-    <script src="popup.js"></script>
+    <script type="module" src="popup.js"></script>
 </body>
 </html>

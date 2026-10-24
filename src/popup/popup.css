@@ -1,110 +1,318 @@
+@font-face {
+    font-family: 'VCR OSD Mono';
+    src: url('../../fonts/VCROSDMono.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('../../fonts/Inter-Regular.woff2') format('woff2');
+}
+
+:root {
+    --blue: #334dad;
+    --line: #b8c1e2; /* --blue at 35% on white, solid so overlapping segments don't darken */
+    --note: #eef0f5;
+    --edge: #f5eff4;
+    --pixel: 'VCR OSD Mono', monospace;
+    --text: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
 body {
-    font-family: 'Roboto Mono', monospace;
-    background-color: #ffff;
+    font-family: var(--text);
+    font-size: 10pt;
+    background-color: #fff;
     margin: 0;
     padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    height: 300px;
-    width: 300px;
+    width: 360px;
     box-sizing: border-box;
-    font-size: 10pt;
+    overflow: hidden; /* only the notes list scrolls, never the popup */
 }
 
-#sticky-notes-container {
+/* Chrome caps a popup at 600px tall. The column never exceeds it: the header
+   and note box keep their size, and the notes list gives up the difference. */
+#app {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    max-width: 300px;
-    max-height: 400px;
-    padding-bottom: 10px;
-    flex-grow: 1;
-    position: relative;
+    max-height: 580px; /* 600px minus the body's padding */
 }
+
+/* Buttons that are just a word or a symbol. */
+.header button,
+.note button,
+.section button {
+    padding: 0;
+    font-family: var(--pixel);
+    font-size: 10pt;
+    color: var(--blue);
+    background: none;
+    border: none;
+    cursor: pointer;
+    user-select: none; /* never part of a selection or a copy */
+}
+
+/* Header */
 
 .header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0px;
+    position: relative;
+    width: 100%;
+    text-align: center;
 }
 
-#sticky-notes-container h4 {
-    font-family: 'VCR OSD Mono', monospace;
+.header h4 {
+    font-family: var(--pixel);
     font-size: 10pt;
+    font-weight: normal;
     margin: 0;
-    display: block;
     padding-bottom: 2px;
-    color: #334dad;
+    color: var(--blue);
 }
+
+/* The title opens Memopad's review page in the Chrome Web Store. */
+#review {
+    color: inherit;
+    text-decoration: none;
+}
+
+#new-section {
+    position: absolute;
+    top: -1px;
+    right: 6px;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+#review:hover,
+#new-section:hover {
+    text-decoration: underline;
+}
+
+#search {
+    width: 100%;
+    margin: 8px 0 0;
+    padding: 6px 14px;
+    font-family: var(--text);
+    font-size: 10pt;
+    box-sizing: border-box;
+    border: 1px solid;
+    border-radius: 7px;
+}
+
+#search:focus {
+    border-color: var(--blue);
+    outline: none;
+}
+
+/* Notes */
 
 #notes {
     width: 100%;
-    margin-bottom: 10px;
+    max-height: 380px;
+    min-height: 0; /* lets it shrink as the note box grows */
+    flex: 0 1 auto;
     overflow-y: auto;
-    flex-grow: 1;
-    scrollbar-width: thin;
-    scrollbar-color: #334dad #eef0f5;
 }
 
-#notes::-webkit-scrollbar {
-    width: 8px;
+#notes:empty {
     display: none;
 }
 
-#notes::-webkit-scrollbar-track {
-    background: #eef0f5;
+/* Scroll bars stay hidden until you scroll (popup.js). */
+#notes,
+#new-note {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
 }
 
-#notes::-webkit-scrollbar-thumb {
-    background-color: #334dad;
+#notes.scrolling,
+#new-note.scrolling {
+    scrollbar-color: var(--blue) transparent;
+}
+
+.note {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 10px 0;
+    padding: 10px 30px 10px 14px; /* room on the right for the X */
+    background-color: var(--note);
+    border: 1px solid var(--edge);
     border-radius: 7px;
-    border: 2px solid #eef0f5;
+    overflow-wrap: break-word;
+    cursor: grab;
 }
 
-#notes:hover::-webkit-scrollbar {
-    display: block;
+.note.static {
+    cursor: default;
 }
+
+.note:focus-within {
+    border-color: var(--blue);
+}
+
+.note-text {
+    outline: none;
+    white-space: pre-wrap;
+    line-height: 18px;
+    cursor: text;
+}
+
+/* Web addresses in a note: the same text, in the pixel font and blue.
+   Clickable at rest (a.link); still blue while you edit (span.link). */
+.note-text .link {
+    font-family: var(--pixel);
+    color: var(--blue);
+    text-decoration: none;
+    word-break: break-all; /* long addresses wrap instead of overflowing */
+}
+
+.note-text a.link:hover {
+    text-decoration: underline;
+}
+
+.note > button {
+    position: absolute;
+    top: 9px; /* centred on the first line of text */
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+}
+
+/* Sections */
+
+.section {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 12px 0 -6px;
+    padding: 4px 25px 4px 2px;
+    font-family: var(--pixel);
+    font-size: 10pt;
+    color: var(--blue);
+    cursor: grab;
+}
+
+.section .toggle {
+    width: 12px;
+    font-size: 9pt;
+    transition: transform 0.15s;
+}
+
+.section:not(.collapsed) .toggle {
+    transform: rotate(90deg);
+}
+
+.section-name {
+    outline: none;
+    cursor: text;
+    min-width: 2ch;
+}
+
+.section-name:empty::before {
+    content: attr(data-placeholder);
+    opacity: 0.4;
+}
+
+.section .count {
+    font-size: 8pt;
+    opacity: 0.6;
+}
+
+.section > button:last-child {
+    position: absolute;
+    top: 1px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+}
+
+.note.member {
+    margin-left: 14px;
+    width: calc(100% - 14px);
+}
+
+/* A line from the section's arrow down past its last note, so the group reads at a glance. */
+.note.member::before {
+    content: "";
+    position: absolute;
+    left: -9px; /* under the section's arrow */
+    top: -12px; /* bridges the gap to the row above */
+    bottom: -1px;
+    width: 2px;
+    border-radius: 1px;
+    background-color: var(--line);
+}
+
+.note.dragging,
+.section.dragging {
+    opacity: 0.4;
+}
+
+/* The X appears only where it's wanted. */
+.note > button,
+.section > button:last-child {
+    opacity: 0;
+    transition: opacity 0.12s;
+}
+
+.note:hover > button,
+.note:focus-within > button,
+.section:hover > button:last-child,
+.section:focus-within > button:last-child {
+    opacity: 1;
+}
+
+/* Note box */
 
 #new-note-container {
     width: 100%;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: sticky;
-    bottom: 0;
-    background-color: #ffff;
     padding-top: 10px;
 }
 
 #new-note {
     width: 100%;
     height: 60px;
+    max-height: 160px;
     margin-bottom: 10px;
-    padding: 10px 20px;
-    font-family: 'Roboto Mono', monospace;
+    padding: 10px 14px;
+    font-family: var(--text);
     font-size: 10pt;
     box-sizing: border-box;
     border-radius: 7px;
-    resize: vertical;
+    resize: none; /* grows with the text instead, up to max-height */
+    overflow-y: auto;
 }
 
-#new-note:focus {
-    border-color: #334dad;
-    outline: none;
+/* Add Note, and beside it (once there are sections) where the note goes. */
+.composer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+#add-note,
+#note-section {
+    padding: 5px 10px;
+    font-family: var(--pixel);
+    font-size: 10pt;
+    color: var(--blue);
+    background-color: var(--note);
+    border: 2px solid var(--edge);
+    border-radius: 7px;
+    cursor: pointer;
 }
 
 #add-note {
-    padding: 5px 10px;
-    font-family: 'VCR OSD mono', monospace;
-    font-size: 10pt;
-    cursor: pointer;
-    background-color: #eef0f5;
-    color: #334dad;
-    border: 2px solid #f5eff4;
-    border-radius: 7px;
     transition: transform 0.2s;
 }
 
@@ -112,89 +320,13 @@ body {
     transform: scale(1.05);
 }
 
-.note {
-    width: 100%;
-    background-color: #eef0f5;
-    border: 1px solid #f5eff4;
-    border-radius: 7px;
-    padding: 10px 20px;
-    margin: 10px 0;
-    overflow: auto;
-    font-family: 'Roboto Mono', monospace;
-    position: relative;
-    word-wrap: break-word;
-    box-sizing: border-box;
-    resize: none;
+#note-section {
+    max-width: 140px;
+    padding: 5px 8px;
 }
 
-.note:focus {
-    border-color: #334dad;
+#new-note:focus,
+#note-section:focus {
+    border-color: var(--blue);
     outline: none;
-}
-
-.note-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.note-header h3 {
-    font-family: 'Roboto Mono', monospace;
-    margin: 0;
-    font-size: 10pt;
-}
-
-.note-header button {
-    font-family: 'VCR OSD Mono', monospace;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #334dad;
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    padding: 0;
-    margin: 0;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    text-align: center;
-}
-
-.note-content {
-    font-family: 'Roboto Mono', monospace;
-    margin-top: 10px;
-    font-size: 10pt;
-}
-
-.note button {
-    font-family: 'VCR OSD mono', monospace;
-    font-size: 10pt;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #334dad;
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    padding: 0;
-    margin: 0;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    text-align: center;
-}
-
-#notes::-webkit-scrollbar {
-    width: 8px;
-}
-
-#notes::-webkit-scrollbar-track {
-    background: #eef0f5;
-}
-
-#notes::-webkit-scrollbar-thumb {
-    background-color: #334dad;
-    border-radius: 7px;
-    border: 2px solid #eef0f5;
 }

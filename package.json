@@ -1,0 +1,17 @@
+{
+  "name": "memopad",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A seamless, minimalistic tool for capturing tasks and ideas.",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nancypatel12/memopad.git"
+  },
+  "bugs": "https://github.com/nancypatel12/memopad/issues",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "package": "rm -f memopad-chrome.zip && zip -qr memopad-chrome.zip manifest.json LICENSE THIRD_PARTY_NOTICES.md icons fonts src -x '*.DS_Store'"
+  }
+}
