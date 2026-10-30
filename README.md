@@ -39,14 +39,7 @@ npm run package   # zip for the Chrome Web Store
 
 ## Contributing
 
-Contributions are welcome. Memopad stays small on purpose, so:
-
-- Open an issue before a big change, so we can agree on it first.
-- Keep each pull request to one change, with tests for anything in `src/lib/`.
-- No dependencies, no build step, no network requests.
-- Keep the look: the same colours, fonts and popup size.
-
-Run `npm test` before opening a pull request. CI runs it too. By contributing, you agree to share your changes under the same license as Memopad.
+Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
