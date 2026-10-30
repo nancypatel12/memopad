@@ -1,6 +1,6 @@
 # Memopad
 
-A seamless, minimalistic tool for capturing tasks and ideas.
+Simple notes that stay on your device.
 
 [Add to Chrome](https://chromewebstore.google.com/detail/memopad/omcpfoipabmmcjpooadjcioiejenaopa)
 
@@ -35,6 +35,7 @@ npm run package   # zip for the Chrome Web Store
 | `src/lib/search.js` | Keyword search |
 | `src/lib/links.js` | Finding web addresses in a note |
 | `test/` | Unit tests for `src/lib/` |
+| `research/` | The search evaluation behind keyword-only search, with [how to run it](research/README.md) |
 
 ## Contributing
 
