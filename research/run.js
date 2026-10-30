@@ -137,6 +137,11 @@ log("\nHubness correction: subtract each note's mean top-10 similarity to the an
 const anchors = await embed(ANCHORS.map((t) => (MODELS[SHIPPED].q ?? "") + t));
 const hubness = sets.map(({ noteVectors }) =>
   noteVectors.map((v) => anchors.map((a) => cosine(a, v)).sort((x, y) => y - x).slice(0, 10).reduce((s, x) => s + x, 0) / 10));
+// The clearest hub: the note that clears the old 0.2 threshold for the most searches it doesn't belong to.
+const strayCounts = sets[0].rows[0].items.map((_, j) =>
+  sets[0].rows.filter((r) => !r.relevant.has(j) && r.similarity[j] > 0.2).map((r) => `${r.text} ${fixed(r.similarity[j])}`));
+const top = strayCounts.reduce((best, s, j) => (s.length > strayCounts[best].length ? j : best), 0);
+log(`  clearest hub: "${sets[0].rows[0].items[top].text}", above 0.2 for ${strayCounts[top].length} unrelated searches: ${strayCounts[top].join("; ")}`);
 const uncorrected = crossValidate(rows).perSearch;
 for (const lambda of [0, 0.5, 0.75, 1]) {
   const corrected = rows.map((r, i) => {
