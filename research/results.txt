@@ -1,0 +1,72 @@
+Memopad search evaluation. Transformers.js 3.5.1, WebAssembly, one thread. 2026-10-30.
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Claude/4.4212.0 Chrome/152.0.7977.167 Safari/537.36
+
+Test set: 93 notes (57 personal, 36 from AI papers), 51 searches, 8 with no right answer.
+Grouped 5-fold cross-validation: 39 groups of searches (near-copies kept together), fold sizes 8, 13, 12, 10, 8.
+Intervals are 95% bootstrap intervals, resampling the groups of searches (1,000 resamples, seed 1).
+
+Keyword search only (what Memopad 2.0 ships): F1 0.362 [0.237, 0.489], precision 0.49, recall 0.22, false positives 42, no-answer searches left empty 8 of 8
+
+Model | MB | pooling | ms per search | AUC | MRR | R@5 | best fixed threshold: precision | tuned on all: floor, margin, false positives | cross-validated F1 [95%] | vs MiniLM [95%] | vs keyword only [95%] | groceries | no-answer left empty
+all-MiniLM-L6-v2 | 23 | mean | 4 | 0.821 | 0.800 | 0.636 | 0.359 | 0.24, 0.11, 68 | 0.538 [0.454, 0.627] | — | 0.176 [0.071, 0.285] | 5 of 12 | 7 of 8
+paraphrase-MiniLM-L6-v2 | 23 | mean | 4 | 0.822 | 0.786 | 0.638 | 0.399 | 0.21, 0.19, 133 | 0.502 [0.410, 0.593] | -0.036 [-0.110, 0.027] | 0.140 [0.018, 0.261] | 8 of 12 | 6 of 8
+all-MiniLM-L12-v2 | 34 | mean | 22 | 0.853 | 0.867 | 0.679 | 0.476 | 0.29, 0.15, 55 | 0.502 [0.406, 0.599] | -0.036 [-0.107, 0.025] | 0.140 [0.011, 0.260] | 4 of 12 | 7 of 8
+bge-small-en-v1.5 | 33 | cls | 57 | 0.865 | 0.853 | 0.689 | 0.332 | 0.52, 0.05, 86 | 0.505 [0.408, 0.603] | -0.033 [-0.114, 0.052] | 0.143 [0.039, 0.246] | 4 of 12 | 6 of 8
+gte-small | 34 | mean | 19 | 0.867 | 0.833 | 0.674 | 0.313 | 0.79, 0.05, 124 | 0.515 [0.429, 0.610] | -0.023 [-0.084, 0.038] | 0.153 [0.067, 0.246] | 9 of 12 | 7 of 8
+e5-small-v2 | 34 | mean | 34 | 0.837 | 0.788 | 0.633 | 0.443 | 0.79, 0.02, 114 | 0.324 [0.237, 0.416] | -0.214 [-0.336, -0.108] | -0.038 [-0.164, 0.088] | 2 of 12 | 3 of 8
+snowflake-arctic-embed-xs | 23 | cls | 46 | 0.849 | 0.843 | 0.681 | 0.342 | 0.54, 0.03, 111 | 0.427 [0.325, 0.525] | -0.111 [-0.221, -0.003] | 0.065 [-0.092, 0.205] | 7 of 12 | 1 of 8
+mdbr-leaf-ir | 23 | model's own | 22 | 0.870 | 0.886 | 0.740 | 0.506 | 0.32, 0.07, 58 | 0.525 [0.429, 0.628] | -0.013 [-0.070, 0.034] | 0.163 [0.052, 0.264] | 6 of 12 | 7 of 8
+granite-embedding-30m-english-ONNX | 30 | model's own | 12 | 0.690 | 0.544 | 0.432 | 0.494 | 0.69, 0.01, 47 | 0.323 [0.210, 0.435] | -0.215 [-0.308, -0.118] | -0.039 [-0.108, 0.009] | 0 of 12 | 7 of 8
+
+all-MiniLM-L6-v2: cosine similarity, median and 90th percentile
+  right notes: 0.26, 0.53
+  unrelated notes: 0.09, 0.22
+  unrelated note-and-search pairs above 0.2: 299 of 2277
+
+all-MiniLM-L6-v2: false positives across all searches
+  every note above 0.2: 308
+  best fixed threshold (0.24): 195
+  hybrid rules (floor 0.24, margin 0.11): 68
+  keyword search only: 42
+
+all-MiniLM-L6-v2: searches with the most wrong results under the hybrid rules
+  benchmarks for language models: Scaling Laws for Neural Langua; read section 3 again; BERT: Pre-training of Deep Bid; Datasheets for Datasets; Language Models are Few-Shot L; Towards Monosemanticity: Decom; Model Cards for Model Reportin; Training language models to fo; Universal and Transferable Adv; Deep Residual Learning for Ima; Chain-of-Thought Prompting Eli; Retrieval-Augmented Generation; On the Dangers of Stochastic P; Denoising Diffusion Probabilis; Towards Deep Learning Models R
+  things to watch or read: submit application to Google; pasta, tomato sauce, parmesan; paper towels and dish soap; coffee with a friend to catch ; back up photos to external dri; send thank-you note to my prof; flight to Chicago Friday 6am, ; book flu shot
+  large language models: Towards Monosemanticity: Decom; Measuring Massive Multitask La; Denoising Diffusion Probabilis; TruthfulQA: Measuring How Mode; Towards Deep Learning Models R
+  home repairs: pick up dry cleaning; paper towels and dish soap; donate old clothes; change the car's oil
+  vacation: plan anniversary dinner; book flu shot; pick up dry cleaning
+  trustworthy AI: AI safety via debate; Constitutional AI: Harmlessnes; Concrete Problems in AI Safety
+  fairness and bias: Explaining and Harnessing Adve; Locating and Editing Factual A; Universal and Transferable Adv
+  AI ethics: AI safety via debate; Constitutional AI: Harmlessnes; Concrete Problems in AI Safety
+
+Real searches: before (every note above 0.2, no page titles), after (hybrid rules, page titles searched), keyword only
+  groceries
+    before:  + bananas and apples; + buy cat food and litter; + oat milk, eggs, spinach, bread; + buy milk; + frozen berries for smoothies; + yogurt and granola for breakfast; + get coffee beans; - coffee with a friend to catch up; + avocados for guacamole; - donate old clothes; - pick up dry cleaning; + meal prep chicken and rice for the week; + paper towels and dish soap; + pasta, tomato sauce, parmesan; - water the plants; - call plumber
+    after:   + bananas and apples; + buy cat food and litter; + oat milk, eggs, spinach, bread; + buy milk; + frozen berries for smoothies
+    keyword: (nothing)
+  AI alignment
+    before:  + Scalable agent alignment via reward mode; + AI safety via debate; + Constitutional AI: Harmlessness from AI ; + Concrete Problems in AI Safety; - A Unified Approach to Interpreting Model; - Universal and Transferable Adversarial A; - Scaling Laws for Neural Language Models; + Risks from Learned Optimization in Advan; - Explaining and Harnessing Adversarial Ex; - Deep Residual Learning for Image Recogni; - TruthfulQA: Measuring How Models Mimic H; - "Why Should I Trust You?": Explaining th; + Training language models to follow instr; - Holistic Evaluation of Language Models; + Deep reinforcement learning from human p; - Towards Deep Learning Models Resistant t; + Sleeper Agents: Training Deceptive LLMs ; - Chain-of-Thought Prompting Elicits Reaso; - Measuring Massive Multitask Language Und; - BERT: Pre-training of Deep Bidirectional; - Language Models are Few-Shot Learners; - Towards Monosemanticity: Decomposing Lan; + we find that models trained with RLHF be
+    after:   + Scalable agent alignment via reward mode; + AI safety via debate; + Constitutional AI: Harmlessness from AI ; + Concrete Problems in AI Safety
+    keyword: + Scalable agent alignment via reward mode; + AI safety via debate; + Constitutional AI: Harmlessness from AI ; + Concrete Problems in AI Safety
+  red teaming
+    before:  - Scalable agent alignment via reward mode; - we find that models trained with RLHF be
+    after:   + read section 3 again
+    keyword: + read section 3 again
+  quantum physics
+    before:  (nothing)
+    after:   (nothing)
+    keyword: (nothing)
+
+A stricter floor, on all searches
+  floor 0.24: F1 0.558, precision 0.54, recall 0.42, false positives 68
+  floor 0.34: F1 0.480, precision 0.58, recall 0.34, false positives 47
+
+Hubness correction: subtract each note's mean top-10 similarity to the anchor topics, times λ
+  λ 0: cross-validated F1 0.538
+  λ 0.5: cross-validated F1 0.576, change 0.039 [0.014, 0.065]
+  λ 0.75: cross-validated F1 0.541, change 0.003 [-0.072, 0.057]
+  λ 1: cross-validated F1 0.550, change 0.012 [-0.069, 0.077]
+
+gte-small: top similarity for "quantum physics" (no right answer): 0.77
+
+Done in 97 s.
